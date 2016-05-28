@@ -9,12 +9,65 @@ import java.util.*;
  */
 public class App {
     private List<Category> categories;
+    private List<Item> items;
+    private Date broughtDate;
+    private InputPolicy inputPolicy;
+    private final SimpleDateFormat df = new SimpleDateFormat("yyyy.MM.dd");
 
     private void scanInput() throws ShoppingException{
         Scanner scanner = new Scanner(System.in);
         scanDiscount(scanner);
-        for(int i = 0 ; i < categories.size() ; i++){
-            System.out.println(categories.get(i));
+        scanBrought(scanner);
+        scanDateAndPolicy(scanner);
+    }
+
+    private void scanDateAndPolicy(Scanner scanner) throws ShoppingException{
+        if(scanner.hasNextLine()){
+            String s = lineContent(scanner.nextLine());
+            try {
+                broughtDate = df.parse(s);
+            }catch (ParseException e){
+                throw new ShoppingException("Brought date error " + s, e);
+            }
+        }
+        if(scanner.hasNextLine()){
+            String s = lineContent(scanner.nextLine());
+            if(s == null){
+                inputPolicy = null;
+                return;
+            }
+            String[] split = s.split(" ");
+            if(split.length != 3){
+                throw new ShoppingException("Preferential policy input error " + s);
+            }
+            try{
+                Date date = df.parse(split[0].trim());
+                inputPolicy = new InputPolicy(date, Double.parseDouble(split[1].trim()) , Double.parseDouble(split[2].trim()));
+            } catch (ParseException e){
+                throw new ShoppingException("Preferential policy date error " + s, e);
+            }
+        }
+
+    }
+
+    private void scanBrought(Scanner scanner) throws ShoppingException {
+        items = new LinkedList<>();
+        while(scanner.hasNextLine()){
+            String s = lineContent(scanner.nextLine());
+            if(s == null){
+                break;
+            }
+            String[] split = s.split(":");
+            if(split.length != 2){
+                throw new ShoppingException("Input brought item error " + s, new IllegalStateException());
+            }
+            String[] split1 = split[0].split("\\*");
+            if(split1.length != 2){
+                throw new ShoppingException("Input brought item error " + s, new IllegalStateException());
+            }
+            int num = Integer.parseInt(split1[0].trim());
+            double price = Double.parseDouble(split[1].trim());
+            items.add(new Item(split1[1].trim(),num,price));
         }
     }
 
@@ -28,9 +81,8 @@ public class App {
             if(split.length != 3){
                 throw new ShoppingException("Input error", new IllegalStateException());
             }
-            SimpleDateFormat df = new SimpleDateFormat("yyyy.MM.dd");
             try {
-                Date parse = df.parse(split[0]);
+                Date parse = df.parse(split[0].trim());
                 Category c = findCategory(split[2].trim());
                 if(c == null) {
                     throw new ShoppingException("Cannot find category for " + split[2], new NullPointerException());
@@ -46,9 +98,10 @@ public class App {
     }
 
     private Category findCategory(String s) {
-        for(int i = 0 ; i < categories.size(); i++){
-            categories.get(i).getName().equals(s);
-            return categories.get(i);
+        for(Category category : categories){
+            if(category.getName().equals(s)) {
+                return category;
+            }
         }
         return null;
     }
@@ -58,7 +111,7 @@ public class App {
         if(split[0].trim().equals("")) {
             return null;
         }
-        return split[0];
+        return split[0].trim();
     }
 
     public static void main(String[] args) {
@@ -66,13 +119,37 @@ public class App {
         try {
             app.initCategoryInfo();
             app.scanInput();
+            System.out.printf("%.2f", app.computeResult());
         }catch (ShoppingException e){
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 
+    private double computeResult() throws ShoppingException{
+        double result = 0;
+        for(Item item : items){
+            result += computeDiscount(broughtDate, item.getNum() * item.getPrice(), findCategory(item.getName()));
+        }
+        if(inputPolicy != null){
+            if(result >= inputPolicy.getCosts() && broughtDate.compareTo(inputPolicy.getEndDate()) <= 0){
+                result -= inputPolicy.getDiscount();
+            }
+        }
+        if(result < 0){
+            throw new ShoppingException("Compute result error, result lower than zero " + result);
+        }
+        return result;
+    }
+
+    private double computeDiscount(Date broughtDate, double price, Category category) throws ShoppingException{
+        if(category == null){
+            throw new ShoppingException("Error input for computing discount", new NullPointerException());
+        }
+        return category.afterDiscount(broughtDate, price);
+    }
+
     private void initCategoryInfo() throws ShoppingException {
-        categories = new ArrayList<>();
+        categories = new LinkedList<>();
         Category c1 = new Category("电子");
         c1.addChildCategory(new Category("ipad"))
                 .addChildCategory(new Category("iphone"))

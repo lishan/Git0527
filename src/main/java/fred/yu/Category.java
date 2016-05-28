@@ -10,12 +10,12 @@ import java.util.List;
 public class Category {
     private String name;
     private List<Category> childCategories;
-    private Discount discount;
+    private List<Discount> discounts;
 
     public Category(String name) {
         this.name = name;
         this.childCategories = new LinkedList<>();
-        this.discount = null;
+        this.discounts = new LinkedList<>();
     }
 
     public String getName() {
@@ -27,7 +27,12 @@ public class Category {
     }
 
     public void setDiscount(Discount discount) {
-        this.discount = discount;
+        this.discounts.add(discount);
+        if(childCategories != null){
+            for(Category c : childCategories){
+                c.setDiscount(discount);
+            }
+        }
     }
 
     public Category addChildCategory(Category category) throws ShoppingException{
@@ -39,8 +44,10 @@ public class Category {
     }
 
     public double afterDiscount(Date date, double cost){
-        if(this.discount.validDate(date)){
-            return this.discount.afterDiscount(cost);
+        for(Discount discount : discounts) {
+            if (discount.validDate(date)) {
+                return discount.afterDiscount(cost);
+            }
         }
         return cost;
     }
@@ -50,7 +57,7 @@ public class Category {
         return "Category{" +
                 "name='" + name + '\'' +
                 ", childCategories=" + childCategories +
-                ", discount=" + discount +
+                ", discounts=" + discounts +
                 '}';
     }
 }
