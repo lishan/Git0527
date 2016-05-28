@@ -16,11 +16,19 @@ public class Policy {
         this.necessaryCost = necessaryCost;
     }
 
+    /**
+     * If shopping date is before preferential policy limit date and money is higher than limit,
+     * we'll do some fee reduce
+     * @param buyDate Shopping date
+     * @param costs Shopping costs
+     * @return After fee reduce
+     * @throws ShoppingException
+     */
     public double costCut(Date buyDate, double costs) throws ShoppingException{
         if(buyDate == null || validDate == null){
             throw new ShoppingException("Input date is null", new NullPointerException());
         }
-        if(buyDate.before(validDate) && costs >= necessaryCost){
+        if(buyDate.compareTo(validDate) <= 0 && costs >= necessaryCost){
             double result = costs-discount;
             if(result < 0){
                 throw new ShoppingException("After discount, costs below zero");

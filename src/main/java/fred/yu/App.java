@@ -88,7 +88,7 @@ public class App {
                     throw new ShoppingException("Cannot find category for " + split[2], new NullPointerException());
                 }
                 else{
-                    c.setDiscount(new Discount(parse, Double.parseDouble(split[1].trim())));
+                    c.addDiscount(new Discount(parse, Double.parseDouble(split[1].trim())));
                 }
 
             }catch (ParseException e){
@@ -97,7 +97,7 @@ public class App {
         }
     }
 
-    private Category findCategory(String s) {
+    Category findCategory(String s) {
         for(Category category : categories){
             if(category.getName().equals(s)) {
                 return category;
@@ -106,7 +106,7 @@ public class App {
         return null;
     }
 
-    private String lineContent(String s) {
+    String lineContent(String s) {
         String[] split = s.split("//");
         if(split[0].trim().equals("")) {
             return null;
@@ -148,7 +148,7 @@ public class App {
         return category.afterDiscount(broughtDate, price);
     }
 
-    private void initCategoryInfo() throws ShoppingException {
+    void initCategoryInfo() throws ShoppingException {
         categories = new LinkedList<>();
         Category c1 = new Category("电子");
         c1.addChildCategory(new Category("ipad"))

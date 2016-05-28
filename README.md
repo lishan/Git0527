@@ -4,6 +4,12 @@ Shopping Cart
 1.	discount
 2.	preferential treatment
 
+TODO
+---
+1. travis ci
+2. editor config
+3. maven plugins
+
 TestCase 1
 ---
 2013.11.11 | 0.7 | 电子 //促销信息,格式为:日期 | 折扣 | 产品品类,可有多个,每个一行,如果没有则保留一个空行

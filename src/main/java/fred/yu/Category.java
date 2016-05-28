@@ -26,11 +26,17 @@ public class Category {
         return childCategories;
     }
 
-    public void setDiscount(Discount discount) {
+    /**
+     * This function will set not only category discount, also child categories included
+     * @param discount costs will cut by discount params
+     */
+    public void addDiscount(Discount discount) {
+        if(discount == null)
+            return;
         this.discounts.add(discount);
         if(childCategories != null){
             for(Category c : childCategories){
-                c.setDiscount(discount);
+                c.addDiscount(discount);
             }
         }
     }
@@ -43,6 +49,12 @@ public class Category {
         throw new ShoppingException("Add child category null", new NullPointerException());
     }
 
+    /**
+     * Search if contains discount
+     * @param date Brought item date
+     * @param cost Brought costs
+     * @return After discount should pay
+     */
     public double afterDiscount(Date date, double cost){
         for(Discount discount : discounts) {
             if (discount.validDate(date)) {
@@ -59,5 +71,9 @@ public class Category {
                 ", childCategories=" + childCategories +
                 ", discounts=" + discounts +
                 '}';
+    }
+
+    public List<Discount> getDiscounts() {
+        return discounts;
     }
 }
