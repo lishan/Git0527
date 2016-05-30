@@ -1,4 +1,4 @@
-Shopping Cart
+Shopping Cart [![Build Status](https://travis-ci.org/lishan/Git0527.svg?branch=master)](https://travis-ci.org/lishan/Git0527.svg?branch=master)
 ---
 
 1.	discount
